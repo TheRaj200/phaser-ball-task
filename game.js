@@ -4,8 +4,8 @@ export let startTime;
 export let endTime;
 export let sessionActive = false; // Track session status
 let ball;
-let timerEvent;
 let mainScene;
+let initialCountdown;
 
 class MainScene extends Phaser.Scene {
   constructor() {
@@ -27,7 +27,6 @@ class MainScene extends Phaser.Scene {
     ball = this.physics.add.image(500, 600, 'ball').setCollideWorldBounds(true).setBounce(1, 1);
     ball.setDisplaySize(100, 100);
 
-    // Set world bounds to the entire screen size
     this.physics.world.setBounds(0, 0, this.scale.width, this.scale.height, true, true, true, true);
 
     document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
@@ -36,37 +35,35 @@ class MainScene extends Phaser.Scene {
   startSession() {
     sessionActive = true;
     sessionID = Phaser.Math.Between(1000, 9999).toString();
-    countdown = Phaser.Math.Between(70, 120);
-    startTime = new Date().toLocaleTimeString();
+    initialCountdown = Phaser.Math.Between(60, 120);
+    startTime = Date.now(); // Store the start time in milliseconds
+    countdown = initialCountdown;
     this.clockSound.play({ loop: true });
 
     const velocityX = Phaser.Math.Between(-600, 600);
     const velocityY = Phaser.Math.Between(-600, 600);
     ball.setVelocity(velocityX, velocityY);
 
-    timerEvent = this.time.addEvent({
-      delay: 1000,
-      callback: this.updateCountdown,
-      callbackScope: this,
-      loop: true
-    });
-
     updateDOMSessionInfo();
   }
 
-  updateCountdown() {
-    if (countdown > 0) {
-      countdown--;
+  update(time, delta) {
+    if (sessionActive) {
+      const elapsedTime = (Date.now() - startTime) / 1000; // Calculate elapsed time in seconds
+      countdown = initialCountdown - Math.floor(elapsedTime);
+
+      if (countdown <= 0) {
+        countdown = 0;
+        this.endSession();
+      }
+
       document.getElementById('counterValue').innerText = countdown;
-    } else {
-      this.endSession();
     }
   }
 
   endSession() {
     endTime = new Date().toLocaleTimeString();
     this.clockSound.stop();
-    timerEvent.remove();
     ball.setVelocity(0, 0);
     sessionActive = false;
 
@@ -76,18 +73,24 @@ class MainScene extends Phaser.Scene {
   }
 
   handleVisibilityChange() {
-    // Do nothing; the game should continue running as usual
-  }
+    if (sessionActive && document.visibilityState === 'visible') {
+      // Recalculate the countdown in case of any missed time
+      const elapsedTime = (Date.now() - startTime) / 1000;
+      countdown = initialCountdown - Math.floor(elapsedTime);
 
-  update(time, delta) {
-    // Remove or modify this method if not needed anymore
+      if (countdown <= 0) {
+        this.endSession();
+      } else {
+        this.clockSound.resume();
+      }
+    }
   }
 }
 
 const config = {
   type: Phaser.CANVAS,
   width: 1000,
-  height: 610,
+  height: 620,
   scene: MainScene,
   parent: 'gameContainer',
   physics: {
@@ -114,7 +117,7 @@ export function startPhaserSession() {
 
 function updateDOMSessionInfo() {
   document.getElementById('sessionId').innerText = sessionID;
-  document.getElementById('startTime').innerText = startTime;
+  document.getElementById('startTime').innerText = new Date(startTime).toLocaleTimeString();
   document.getElementById('counterValue').innerText = countdown;
 }
 
