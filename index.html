@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phaser Session Game</title>
+  <style>
+   
+       #rightPanel {  
+      position: fixed;
+      width: 200px;  /* Fixes the panel to a specific position */
+      top: 100px;        /* Positions the panel 10px from the top */
+      right: 80px;      /* Positions the panel 10px from the right edge */
+      background-color: rgba(255, 255, 255, 0.8); /* Adds a semi-transparent background */
+      padding: 10px;    /* Adds some padding for aesthetics */
+      border-radius: 8px; /* Rounds the corners of the panel */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Adds a slight shadow */
+    }
+    /* (Your existing styles) */
+  </style>
+</head>
+<body>
+  <div id="gameContainer"></div>
+  <div id="rightPanel">
+    <button id="startSessionBtn">Start Game</button>
+    <div>Session ID: <span id="sessionId"></span></div>
+    <div>Start Time: <span id="startTime"></span></div>
+    <div>End Time: <span id="endTime"></span></div>
+    <div id="counter">Counter: <span id="counterValue"></span></div>
+    <ul id="sessionList"></ul>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+  <script src="dom.js" type="module"></script>
+</body>
+</html>
